@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Interactif</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+
+<body class="bg-light">
+  <div class="container mt-5">
+    <!-- Écran d'accueil -->
+    <div id="welcome-screen" class="text-center">
+      <h1>Bienvenue au Quiz !</h1>
+      <button id="start-btn" class="btn btn-success mt-4">Commencer le quiz</button>
+    </div>
+
+    <div class="progress my-3">
+      <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="1"
+        aria-valuemin="1" aria-valuemax="10"></div>
+    </div>
+
+
+    <div id="quiz-interface" class="card p-4 shadow-sm d-none">
+      <div id="question" class="fw-bold mb-3"></div>
+      <form id="choices" class="mb-3"></form>
+
+      <div class="d-flex justify-content-between">
+        <button id="prev-btn" class="btn btn-secondary">Retour</button>
+        <button id="next-btn" class="btn btn-primary">Suivant</button>
+        <button id="submit-btn" class="btn btn-success d-none">Valider</button>
+      </div>
+    </div>
+
+
+
+    <div id="result-screen" class="text-center mt-4 d-none">
+      <h2>Résultat du quiz</h2>
+      <p id="score" class="fs-4 fw-bold"></p>
+      <div id="summary" class="mt-4"></div>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>
