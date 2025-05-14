@@ -1,24 +1,39 @@
 import { quiz } from "./quiz.js";
 
+
 let currentQuestion = 0;
 let score = 0;
 let userAnswers = [];
+localStorage.removeItem("quizState");
 
-const welcomeScreen = document.getElementById("welcome-screen");
+const savedState = localStorage.getItem("quizState");
+if (savedState) {
+   const state = JSON.parse(savedState);
+   currentQuestion = state.currentQuestion || 0;
+   score = state.score || 0;
+   userAnswers = state.userAnswers || [];
+}
+
 const quizInterface = document.getElementById("quiz-interface");
 const resultScreen = document.getElementById("result-screen");
 
-const question = document.getElementById("question");
-const choices = document.getElementById("choices");
-const nextBtn = document.getElementById("next-btn");
-const submitBtn = document.getElementById("submit-btn");
-const scoreEl = document.getElementById("score");
-const prevBtn = document.getElementById("prev-btn");
 const progressBar = document.getElementById("progress-bar");
 
 
-function showQuestion() 
-{
+const question = document.getElementById("question");
+const choices = document.getElementById("choices");
+const scoreEl = document.getElementById("score");
+
+// Boutons
+const startBtn = document.getElementById("start-btn");
+const restartBtn = document.getElementById("restart-btn");
+const nextBtn = document.getElementById("next-btn");
+const submitBtn = document.getElementById("submit-btn");
+const prevBtn = document.getElementById("prev-btn");
+
+
+
+function showQuestion() {
    const q = quiz[currentQuestion];
    question.textContent = q.question;
    choices.innerHTML = "";
@@ -33,7 +48,7 @@ function showQuestion()
       choices.appendChild(div);
    });
 
-   // Rétablit la sélection précédente si elle existe
+
    if (userAnswers[currentQuestion]) {
       const radios = document.querySelectorAll('input[name="choice"]');
       radios.forEach(radio => {
@@ -43,31 +58,32 @@ function showQuestion()
       });
    }
 
-   // Affiche ou masque le bouton retour
+
    if (currentQuestion === 0) {
       prevBtn.classList.add("d-none");
    } else {
       prevBtn.classList.remove("d-none");
    }
 
-   // MAJ de la barre de progression
+
    const percent = ((currentQuestion + 1) / quiz.length) * 100;
    progressBar.style.width = percent + "%";
    progressBar.setAttribute("aria-valuenow", currentQuestion + 1);
    progressBar.textContent = `${currentQuestion + 1} / ${quiz.length}`;
 }
 
-document.getElementById("start-btn").addEventListener("click", () => {
-   welcomeScreen.classList.add("d-none");
+
+
+
+
+
+
+// Évenements
+startBtn.addEventListener("click", () => {
+   startBtn.classList.add("d-none");
    quizInterface.classList.remove("d-none");
    showQuestion();
 });
-
-
-function checkAnswer() 
-{
-   return getSelectedChoice() === quiz[currentQuestion].answer;
-}
 
 
 nextBtn.addEventListener("click", () => {
@@ -78,7 +94,6 @@ nextBtn.addEventListener("click", () => {
    }
    userAnswers[currentQuestion] = selected;
 
-   if (checkAnswer()) score++;
    currentQuestion++;
 
    if (currentQuestion < quiz.length - 1) {
@@ -88,7 +103,9 @@ nextBtn.addEventListener("click", () => {
       nextBtn.classList.add("d-none");
       submitBtn.classList.remove("d-none");
    }
+   saveQuizState();
 });
+
 
 
 prevBtn.addEventListener("click", () => {
@@ -111,17 +128,35 @@ submitBtn.addEventListener("click", () => {
       return;
    }
    userAnswers[currentQuestion] = selected;
-   if (checkAnswer()) score++;
+
+   score = calculateScore();
 
    quizInterface.classList.add("d-none");
    resultScreen.classList.remove("d-none");
-   scoreEl.textContent = `Votre score est de ${score} sur ${quiz.length}`;
+   scoreEl.textContent = `Votre score est de ${score} / ${quiz.length}`;
    showSummary();
 });
 
 
-function getSelectedChoice() 
-{
+
+restartBtn.addEventListener("click", () => {
+   currentQuestion = 0;
+   score = 0;
+   userAnswers = [];
+   resultScreen.classList.add("d-none");
+   quizInterface.classList.remove("d-none");
+   localStorage.removeItem("quizState");
+
+   submitBtn.classList.add("d-none");
+   nextBtn.classList.remove("d-none");
+
+   showQuestion();
+});
+
+
+
+
+function getSelectedChoice() {
    const radios = document.querySelectorAll('input[name="choice"]');
    for (let radio of radios) {
       if (radio.checked) return radio.value;
@@ -130,9 +165,19 @@ function getSelectedChoice()
 }
 
 
+
+
+
+function calculateScore() {
+   return quiz.reduce((total, q, i) => {
+      return total + (userAnswers[i] === q.answer ? 1 : 0);
+   }, 0);
+}
+
+
+
 function showSummary() {
    const summaryDiv = document.getElementById("summary");
-   summaryDiv.innerHTML = "<h4>Détail de vos réponses :</h4>";
    quiz.forEach((q, i) => {
       const isCorrect = userAnswers[i] === q.answer;
       summaryDiv.innerHTML += `
@@ -145,4 +190,14 @@ function showSummary() {
          </div>
       `;
    });
+}
+
+
+function saveQuizState() {
+   const state = {   
+      currentQuestion,
+      score,
+      userAnswers
+   };
+   localStorage.setItem("quizState", JSON.stringify(state));
 }
